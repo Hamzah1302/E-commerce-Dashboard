@@ -127,4 +127,4 @@ with col2:
 
 # Footer
 st.markdown("---")
-st.caption("E-commerce Dashboard © 2024")
+st.caption("E-commerce Dashboard © 2025")
