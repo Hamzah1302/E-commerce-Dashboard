@@ -29,11 +29,11 @@ def create_seller_city_df(df):
 
 # Load Data
 def load_data():
-    orders = pd.read_csv('../E-Commerce Public Dataset/orders_dataset.csv')
-    payments = pd.read_csv('../E-Commerce Public Dataset/order_payments_dataset.csv')
-    products = pd.read_csv('../E-Commerce Public Dataset/products_dataset.csv')
-    sellers = pd.read_csv('../E-Commerce Public Dataset/sellers_dataset.csv')
-    order_items = pd.read_csv('../E-Commerce Public Dataset/order_items_dataset.csv')
+    orders = pd.read_csv('E-Commerce Public Dataset/orders_dataset.csv')
+    payments = pd.read_csv('E-Commerce Public Dataset/order_payments_dataset.csv')
+    products = pd.read_csv('E-Commerce Public Dataset/products_dataset.csv')
+    sellers = pd.read_csv('E-Commerce Public Dataset/sellers_dataset.csv')
+    order_items = pd.read_csv('E-Commerce Public Dataset/order_items_dataset.csv')
     return orders, payments, products, sellers, order_items
 
 # Dashboard
