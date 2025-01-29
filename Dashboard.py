@@ -35,6 +35,9 @@ def load_data():
     sellers = pd.read_csv('E-Commerce Public Dataset/sellers_dataset.csv')
     order_items = pd.read_csv('E-Commerce Public Dataset/order_items_dataset.csv')
     return orders, payments, products, sellers, order_items
+    # Pastikan kolom tanggal ada di dataset
+    orders['order_purchase_timestamp'] = pd.to_datetime(orders['order_purchase_timestamp'])
+    return orders, payments, products, sellers, order_items
 
 # Dashboard
 st.set_page_config(page_title="E-commerce Dashboard", layout="wide")
@@ -45,7 +48,7 @@ orders, payments, products, sellers, order_items = load_data()
 # Sidebar
 st.sidebar.title('E-commerce Dashboard')
 st.sidebar.image("foto.jpg", use_column_width=True)
-#profil
+# Profil
 st.sidebar.markdown("### Developer")
 st.sidebar.write("**Nama:** Muhamad Hamzah")
 st.sidebar.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/muhamad-hamzah-b25b85281/)")
@@ -54,12 +57,37 @@ st.sidebar.markdown("[![GitHub](https://img.shields.io/badge/GitHub-181717?style
 # Main Dashboard
 st.title('E-commerce Analysis Dashboard 📊')
 
+# Filter Berdasarkan Tanggal
+start_date, end_date = st.sidebar.date_input(
+    'Pilih Rentang Tanggal', 
+    [orders['order_purchase_timestamp'].min(), orders['order_purchase_timestamp'].max()]
+)
+
+# Filter berdasarkan tanggal
+orders_filtered = orders[(orders['order_purchase_timestamp'] >= pd.to_datetime(start_date)) &
+                          (orders['order_purchase_timestamp'] <= pd.to_datetime(end_date))]
+
+# Filter Berdasarkan Kategori Produk
+selected_category = st.sidebar.selectbox(
+    'Pilih Kategori Produk', 
+    options=['All'] + list(products['product_category_name'].unique())
+)
+
+# Filter data produk
+if selected_category != 'All':
+    products_filtered = products[products['product_category_name'] == selected_category]
+else:
+    products_filtered = products
+
+# Tampilkan Jumlah Pemesanan Berdasarkan Tanggal
+st.write(f"Data Diperbarui: Menampilkan Pemesanan dari {start_date} hingga {end_date}")
+
 # Metrics Row
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.metric("Total Orders", f"{len(orders):,}")
+    st.metric("Total Orders", f"{len(orders_filtered):,}")
 with col2:
-    st.metric("Total Products", f"{len(products):,}")
+    st.metric("Total Products", f"{len(products_filtered):,}")
 with col3:
     st.metric("Total Sellers", f"{len(sellers):,}")
 with col4:
@@ -67,7 +95,7 @@ with col4:
 
 # Order Status Analysis
 st.header('1. Order Status Distribution')
-orders_status_df = create_orders_status_df(orders)
+orders_status_df = create_orders_status_df(orders_filtered)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 sns.barplot(data=orders_status_df, x='order_status', y='count', palette='viridis')
@@ -78,28 +106,22 @@ plt.close()
 
 # Product Category Analysis
 st.header('2. Top 10 Product Categories')
-top_products_df = create_top_products_df(products)
+top_products_df = create_top_products_df(products_filtered)
 
 fig, ax = plt.subplots(figsize=(12, 6))
 sns.barplot(data=top_products_df, x='count', y='product_category_name', palette='viridis')
-plt.title('Top 10 Product Categories')
+plt.title(f'Top 10 Product Categories (Category: {selected_category})')
 st.pyplot(fig)
 plt.close()
 
 # Payment Analysis
 st.header('3. Payment Method Distribution')
-col1, col2 = st.columns(2)
-
-with col1:
-    payment_type_df = create_payment_type_df(payments)
-    fig, ax = plt.subplots(figsize=(8, 8))
-    plt.pie(payment_type_df['count'], labels=payment_type_df['payment_type'], autopct='%1.1f%%')
-    plt.title('Payment Method Distribution')
-    st.pyplot(fig)
-    plt.close()
-
-with col2:
-    st.dataframe(payment_type_df, use_container_width=True)
+payment_type_df = create_payment_type_df(payments)
+fig, ax = plt.subplots(figsize=(8, 8))
+plt.pie(payment_type_df['count'], labels=payment_type_df['payment_type'], autopct='%1.1f%%')
+plt.title('Payment Method Distribution')
+st.pyplot(fig)
+plt.close()
 
 # Seller Analysis
 st.header('4. Top 10 Cities by Number of Sellers')
@@ -128,3 +150,4 @@ with col2:
 # Footer
 st.markdown("---")
 st.caption("E-commerce Dashboard © 2025")
+
